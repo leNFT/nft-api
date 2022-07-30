@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   var bestBid;
   //Test NFT
   if (address == "0x9fbf133ea8f0a0fd5617705d090256e488f770d3") {
-    bestBid = parseUnits("2", 18);
+    bestBid = parseUnits("3", 18);
   } else {
     bestBid = await getBestBid(address, tokenId);
   }
