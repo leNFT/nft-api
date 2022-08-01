@@ -86,5 +86,8 @@ export default async function handler(req, res) {
     payload: payload,
   };
 
+  // Setup CORS policy
+  res.header("Access-Control-Allow-Origin", "https://lenft.finance");
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.status(200).json(sigPacket);
 }
