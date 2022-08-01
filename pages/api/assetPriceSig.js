@@ -12,7 +12,7 @@ const ONE_HOUR = 3600;
 const cors = initMiddleware(
   // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
   Cors({
-    // Only allow requests with GET, POST and OPTIONS
+    // Only allow requests with GET and from the frontend
     methods: ["GET"],
     origin: ["https://lenft.finance", "http://localhost:3000"],
   })

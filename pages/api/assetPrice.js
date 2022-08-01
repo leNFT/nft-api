@@ -1,7 +1,22 @@
 import { getBestBid } from "./getBestBid.js";
 import { parseUnits } from "@ethersproject/units";
+import Cors from "cors";
+import initMiddleware from "../../lib/init-middleware";
+
+// Initialize the cors middleware
+const cors = initMiddleware(
+  // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
+  Cors({
+    // Only allow requests with GET and from the frontend
+    methods: ["GET"],
+    origin: ["https://lenft.finance", "http://localhost:3000"],
+  })
+);
 
 export default async function handler(req, res) {
+  // Run cors
+  await cors(req, res);
+
   const { tokenId, address } = req.query;
 
   console.log("address", address);
