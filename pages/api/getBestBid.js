@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { parseUnits } from "@ethersproject/units";
 
 export async function getBestBid(collection, tokenId) {
   const options = {

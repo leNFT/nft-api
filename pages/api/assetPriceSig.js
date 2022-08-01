@@ -1,6 +1,6 @@
 import abi from "web3-eth-abi";
-import { parseUnits } from "@ethersproject/units";
 import { utils } from "ethers";
+import { parseUnits } from "@ethersproject/units";
 import { getMessage } from "eip-712";
 import { getBestBid } from "./getBestBid.js";
 
