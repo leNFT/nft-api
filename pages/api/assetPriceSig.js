@@ -3,10 +3,25 @@ import { utils } from "ethers";
 import { parseUnits } from "@ethersproject/units";
 import { getMessage } from "eip-712";
 import { getBestBid } from "./getBestBid.js";
+import Cors from "cors";
+import initMiddleware from "../../lib/init-middleware";
 
 const ONE_HOUR = 3600;
 
+// Initialize the cors middleware
+const cors = initMiddleware(
+  // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
+  Cors({
+    // Only allow requests with GET, POST and OPTIONS
+    methods: ["GET"],
+    origin: ["https://lenft.finance", "http://localhost:3000"],
+  })
+);
+
 export default async function handler(req, res) {
+  // Run cors
+  await cors(req, res);
+
   const { requestId, tokenId, address } = req.query;
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
 
