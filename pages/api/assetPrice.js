@@ -26,13 +26,5 @@ export default async function handler(req, res) {
     res.status(400).json({ error: "Lacks input data" });
   }
 
-  var bestBid;
-  //Test NFT
-  if (address == "0x9fbf133ea8f0a0fd5617705d090256e488f770d3") {
-    bestBid = parseUnits("3", 18);
-  } else {
-    bestBid = await getBestBid(address, tokenId);
-  }
-
-  res.status(200).json(bestBid.toString());
+  res.status(200).json((await getBestBid(address, tokenId)).toString());
 }

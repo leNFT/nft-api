@@ -32,14 +32,6 @@ export default async function handler(req, res) {
     res.status(400).json({ error: "Lacks input data" });
   }
 
-  var bestBid;
-  //Test NFT
-  if (address == "0x9fbf133ea8f0a0fd5617705d090256e488f770d3") {
-    bestBid = parseUnits("3", 18);
-  } else {
-    bestBid = await getBestBid(address, tokenId);
-  }
-
   const payload = abi.encodeParameter(
     {
       TokenPriceBoost: {
@@ -51,7 +43,7 @@ export default async function handler(req, res) {
     {
       collection: address,
       tokenId: tokenId,
-      amount: bestBid,
+      amount: await getBestBid(address, tokenId);
     }
   );
 

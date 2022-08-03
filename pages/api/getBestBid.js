@@ -10,6 +10,10 @@ export async function getBestBid(collection, tokenId) {
     },
   };
 
+  if (collection == "0x9fbf133ea8f0a0fd5617705d090256e488f770d3") {
+    return parseUnits("3", 18);
+  }
+
   const tokenBestBidResponse = await fetch(
     "https://api.modulenft.xyz/api/v1/opensea/token/bestBid?tokenId=" +
       tokenId +
