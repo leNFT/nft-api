@@ -6,7 +6,6 @@ import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 
 const ONE_HOUR = 3600;
-
 // Initialize the cors middleware
 const cors = initMiddleware(
   // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
@@ -66,7 +65,7 @@ export default async function handler(req, res) {
       name: "leNFT",
       version: "1",
       chainId: 5,
-      verifyingContract: "0xA7336b74832715be9Ae9CBd98d1B10e40B1F4277",
+      verifyingContract: "0x420066167425fA7f3188eeB7EF5F315C4DDd8242",
     },
     message: {
       request: requestId,
