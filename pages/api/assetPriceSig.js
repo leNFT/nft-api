@@ -1,8 +1,7 @@
 import abi from "web3-eth-abi";
 import { utils } from "ethers";
-import { parseUnits } from "@ethersproject/units";
 import { getMessage } from "eip-712";
-import { getBestBid } from "./getBestBid.js";
+import { getTokenValuation } from "./getTokenValuation.js";
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 
@@ -43,7 +42,7 @@ export default async function handler(req, res) {
     {
       collection: address,
       tokenId: tokenId,
-      amount: await getBestBid(address, tokenId),
+      amount: await getTokenValuation(address, tokenId),
     }
   );
 
