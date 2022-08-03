@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     {
       collection: address,
       tokenId: tokenId,
-      amount: await getBestBid(address, tokenId);
+      amount: await getBestBid(address, tokenId),
     }
   );
 
