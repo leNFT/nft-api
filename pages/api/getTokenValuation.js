@@ -24,9 +24,6 @@ export async function getTokenValuation(collection, tokenId) {
   const tokenValuation = await tokenValuationResponse.json();
   const priceEstimate = tokenValuation.data[0].currentPricing.estimatedPrice;
   const confidence = tokenValuation.data[0].currentPricing.confidence;
-  console.log("tokenValuation", tokenValuation);
-  console.log("priceEstimate", priceEstimate);
-  console.log("confidence", confidence);
 
   return priceEstimate * confidence;
 }
