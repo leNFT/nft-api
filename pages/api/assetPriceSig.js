@@ -65,7 +65,7 @@ export default async function handler(req, res) {
       name: "leNFT",
       version: "1",
       chainId: 5,
-      verifyingContract: "0x61F2Fa39a0Cc1611eea31a8a1bf6b464724130da",
+      verifyingContract: "0x27704E30DD353D61Af9f9C1C8D7ad2e9201E48A7",
     },
     message: {
       request: requestId,
