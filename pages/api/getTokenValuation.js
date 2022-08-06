@@ -11,7 +11,7 @@ export async function getTokenValuation(collection, tokenId) {
   };
 
   if (collection == "0xaa8651f1c0419d108fe0a1303e0da692a42850e7") {
-    return parseUnits("3", 18);
+    return parseUnits("1", 18);
   }
 
   const tokenValuationResponse = await fetch(
