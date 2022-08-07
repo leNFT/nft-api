@@ -20,13 +20,17 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { requestId, tokenId, address } = req.query;
+  const { requestId, tokenId, address, chainId } = req.query;
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
+  var verifyingContract;
 
-  console.log("address", address);
-
-  //Check inputs
+  if (chainId == 1) {
+    verifyingContract = process.env.MAINNET_VERIFYING_CONTRACT;
+  } else if (chainId == 5) {
+    verifyingContract = process.env.GOERLI_VERIFYING_CONTRACT;
+  }
   if (!(tokenId && address)) {
+    //Check inputs
     res.status(400).json({ error: "Lacks input data" });
   }
 
@@ -64,8 +68,8 @@ export default async function handler(req, res) {
     domain: {
       name: "leNFT",
       version: "1",
-      chainId: 5,
-      verifyingContract: "0x27704E30DD353D61Af9f9C1C8D7ad2e9201E48A7",
+      chainId: chainId,
+      verifyingContract: verifyingContract,
     },
     message: {
       request: requestId,
