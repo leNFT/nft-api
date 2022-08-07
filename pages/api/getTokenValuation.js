@@ -10,7 +10,7 @@ export async function getTokenValuation(collection, tokenId) {
     },
   };
 
-  if (collection == "0xaa8651f1c0419d108fe0a1303e0da692a42850e7") {
+  if (collection == "0xAa8651F1c0419d108fe0a1303e0da692A42850e7") {
     return parseUnits("0.4", 18);
   }
 
