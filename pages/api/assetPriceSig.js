@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
   var verifyingContract;
 
+  console.log("Got a price request for chainID:", chainId);
   if (chainId == 1) {
     verifyingContract = process.env.MAINNET_VERIFYING_CONTRACT;
   } else if (chainId == 5) {
