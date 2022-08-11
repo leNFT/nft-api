@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     },
   };
 
-  const signingKey = new utils.SigningKey(process.env.SERVER_KEY);
+  const signingKey = new utils.SigningKey(process.env.SERVER_PRIVATE_KEY);
 
   // Get a signable message from the typed data
   const message = getMessage(typedData, true);
