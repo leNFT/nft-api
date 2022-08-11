@@ -10,6 +10,7 @@ export async function getTokenValuation(collection, tokenId) {
     },
   };
 
+  //Test collection on test network
   if (collection == "0x578F3dBa2366dc52f46305E25f3BC7bcE9229819") {
     return parseUnits("0.4", 18);
   }
