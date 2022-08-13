@@ -10,7 +10,7 @@ export async function getTokenValuation(collection, tokenId) {
     },
   };
 
-  //Test collection on test network
+  // Test collection case for goerli
   if (collection == "0x0171dB1e3Cc005d2A6E0BA531509D007a5B8C1a8") {
     return parseUnits("0.4", 18);
   }
