@@ -8,7 +8,11 @@ const cors = initMiddleware(
   Cors({
     // Only allow requests with GET and from the frontend
     methods: ["GET"],
-    origin: ["https://lenft.finance", "http://localhost:3000"],
+    origin: [
+      "https://lenft.finance",
+      "http://localhost:3000",
+      "https://lenft.fi",
+    ],
   })
 );
 
