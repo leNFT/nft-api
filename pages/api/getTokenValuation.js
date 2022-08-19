@@ -12,19 +12,21 @@ export async function getTokenValuation(collection, tokenId) {
 
   // Test collection case for goerli
   if (collection == "0x0171dB1e3Cc005d2A6E0BA531509D007a5B8C1a8") {
-    return parseUnits("0.4", 18);
+    return parseUnits("0.1", 18);
   }
 
-  const tokenValuationResponse = await fetch(
-    "https://api.upshot.io/v1/prices/latest?assetId=" +
-      collection +
-      "/" +
-      tokenId,
-    options
-  ).catch((err) => console.error(err));
-  const tokenValuation = await tokenValuationResponse.json();
-  const priceEstimate = tokenValuation.data[0].currentPricing.estimatedPrice;
-  const confidence = tokenValuation.data[0].currentPricing.confidence;
+  const url =
+    "https://api.upshot.io/v2/assets/" +
+    collection +
+    "/" +
+    tokenId +
+    "?include_asset_stats=false&include_trait_stats=false";
+
+  const assetResponse = await fetch(url, options).catch((err) =>
+    console.error(err)
+  );
+  const asset = await assetResponse.json();
+  const priceEstimate = asset.data.appraisal.wei;
   const multiplier = 0.8;
-  return priceEstimate * confidence * multiplier;
+  return priceEstimate * multiplier;
 }
