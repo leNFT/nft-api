@@ -26,7 +26,11 @@ export async function getTokenValuation(collection, tokenId) {
     console.error(err)
   );
   const asset = await assetResponse.json();
-  const priceEstimate = asset.data.appraisal.wei;
-  const multiplier = 0.8;
-  return priceEstimate * multiplier;
+  if (asset.data === undefined) {
+    return 0;
+  } else {
+    const priceEstimate = asset.data.appraisal.wei;
+    const multiplier = 0.8;
+    return priceEstimate * multiplier;
+  }
 }
