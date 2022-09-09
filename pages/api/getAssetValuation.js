@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { parseUnits } from "@ethersproject/units";
 
-export async function getTokenValuation(collection, tokenId) {
+export async function getAssetValuation(collection, tokenId) {
   const options = {
     method: "GET",
     headers: {
