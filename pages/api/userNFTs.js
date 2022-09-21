@@ -33,26 +33,24 @@ export default async function handler(req, res) {
 
   var collectionsURLString = "";
   if (collection) {
-    collectionsURLString = "&token_addresses=" + collection;
+    collectionsURLString = "&contractAddresses[]=" + collection;
   }
 
-  const serverAddress = "https://deep-index.moralis.io/api/v2/";
-  console.log(process.env.MORALIS_API_KEY);
+  const serverAddress =
+    "https://eth-" +
+    chainName +
+    ".g.alchemy.com/nft/v2/" +
+    process.env.ALCHEMY_API_KEY +
+    "/getNFTs";
 
   const options = {
     method: "GET",
     headers: {
       Accept: "application/json",
-      "X-API-Key": process.env.MORALIS_API_KEY,
     },
   };
   const getNFTsResponse = await fetch(
-    serverAddress +
-      address +
-      "/nft?chain=" +
-      chainName +
-      "&format=decimal" +
-      collectionsURLString,
+    serverAddress + "?owner=" + address + collectionsURLString,
     options
   ).catch((err) => console.error(err));
   const nfts = await getNFTsResponse.json();
