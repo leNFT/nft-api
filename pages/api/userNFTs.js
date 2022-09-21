@@ -55,7 +55,7 @@ export default async function handler(req, res) {
   ).catch((err) => console.error(err));
   const nfts = await getNFTsResponse.json();
 
-  console.log("nfts", nfts);
+  console.log("nfts", nfts.ownedNfts);
 
-  res.status(200).json(nfts);
+  res.status(200).json(nfts.ownedNfts);
 }
