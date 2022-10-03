@@ -16,7 +16,7 @@ export async function getAssetValuation(collection, tokenId) {
   }
 
   const url =
-    "https://api.upshot.io/v2/assets/" +
+    "https://api.upshot.xyz/v2/assets/" +
     collection +
     "/" +
     tokenId +
