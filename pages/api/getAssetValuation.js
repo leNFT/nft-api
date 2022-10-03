@@ -26,7 +26,7 @@ export async function getAssetValuation(collection, tokenId) {
     console.error(err)
   );
   const asset = await assetResponse.json();
-  if (asset.data === undefined) {
+  if (asset.data.appraisal === undefined) {
     return 0;
   } else {
     const priceEstimate = asset.data.appraisal.wei;
