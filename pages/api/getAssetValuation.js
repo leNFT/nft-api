@@ -15,12 +15,7 @@ export async function getAssetValuation(collection, tokenId) {
     return parseUnits("0.0018", 18);
   }
 
-  const url =
-    "https://api.upshot.xyz/v2/assets/" +
-    collection +
-    "/" +
-    tokenId +
-    "?include_asset_stats=false&include_trait_stats=false";
+  const url = "https://api.upshot.xyz/v2/assets/" + collection + "/" + tokenId;
 
   const assetResponse = await fetch(url, options).catch((err) =>
     console.error(err)
@@ -29,7 +24,7 @@ export async function getAssetValuation(collection, tokenId) {
   if (asset.data.appraisal === undefined) {
     return 0;
   } else {
-    const priceEstimate = asset.data.appraisal.wei;
+    const priceEstimate = asset.appraisal.wei;
     const multiplier = 0.8;
     return priceEstimate * multiplier;
   }
