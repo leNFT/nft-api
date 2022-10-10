@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { parseUnits } from "@ethersproject/units";
-import testData from "testData.json";
+import testData from "./testData.json";
 
 export async function getAssetValuation(collection, tokenId) {
   const options = {
