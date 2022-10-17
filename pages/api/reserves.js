@@ -22,11 +22,14 @@ export default async function handler(req, res) {
   const { chainId } = req.query;
 
   var chainName;
+  var marketAddress;
   console.log(chainId);
   if (chainId == 1) {
     chainName = "eth";
+    marketAddress = process.env.MAINNET_MARKET_CONTRACT;
   } else if (chainId == 5) {
     chainName = "goerli";
+    marketAddress = process.env.GOERLI_MARKET_CONTRACT;
   } else {
     res.status(400).json({ error: "Invalid chainId" });
   }
@@ -50,7 +53,7 @@ export default async function handler(req, res) {
       method: "eth_getLogs",
       params: [
         {
-          address: "0x2763678999b36940808210D46634131dc45f8AD2",
+          address: marketAddress,
           topics: [
             "0xe1866131bb60ded80b1b83df69d15c852b90d58e59bf343600ba772b38d0f031",
           ],
