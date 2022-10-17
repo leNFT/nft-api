@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     headers: {
       Accept: "application/json",
     },
-    body: {
+    body: JSON.stringify({
       id: 1,
       jsonrpc: "2.0",
       method: "eth_getLogs",
@@ -59,14 +59,12 @@ export default async function handler(req, res) {
           ],
         },
       ],
-    },
+    }),
   };
   const getReservesResponse = await fetch(url, options).catch((err) =>
     console.error(err)
   );
-  console.log("getReservesResponse", getReservesResponse);
   const reserves = await getReservesResponse.json();
-  console.log("getReservesResponse", getReservesResponse);
   console.log("reserves", reserves);
 
   try {
