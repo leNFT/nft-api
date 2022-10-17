@@ -39,7 +39,7 @@ export default async function handler(req, res) {
   const url =
     "https://eth-" +
     chainName +
-    ".g.alchemy.com/nft/v2/" +
+    ".g.alchemy.com/v2/" +
     process.env.ALCHEMY_API_KEY;
 
   const options = {
@@ -66,13 +66,19 @@ export default async function handler(req, res) {
   );
   console.log("getReservesResponse", getReservesResponse);
   const reserves = await getReservesResponse.json();
+  console.log("getReservesResponse", getReservesResponse);
   console.log("reserves", reserves);
-  reserves.result.forEach((result) => {
-    reservesAddresses.push({
-      address: result.topics[1],
-      block: result.blockNumber,
+
+  try {
+    reserves.result.forEach((result) => {
+      reservesAddresses.push({
+        address: result.topics[1],
+        block: result.blockNumber,
+      });
     });
-  });
+  } catch (error) {
+    console.log(error);
+  }
 
   res.status(200).json(reservesAddresses);
 }
