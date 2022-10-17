@@ -64,7 +64,9 @@ export default async function handler(req, res) {
   const getReservesResponse = await fetch(url, options).catch((err) =>
     console.error(err)
   );
+  console.log("getReservesResponse", getReservesResponse);
   const reserves = await getReservesResponse.json();
+  console.log("reserves", reserves);
   reserves.result.forEach((result) => {
     reservesAddresses.push({
       address: result.topics[1],
