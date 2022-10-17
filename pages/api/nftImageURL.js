@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     return "Unsupported ChainID";
   }
 
-  const serverAddress =
+  const url =
     "https://eth-" +
     chainName +
     ".g.alchemy.com/nft/v2/" +
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     },
   };
   const getNFTMetadataResponse = await fetch(
-    serverAddress + "?contractAddress=" + address + "&tokenId=" + tokenId,
+    url + "?contractAddress=" + address + "&tokenId=" + tokenId,
     options
   ).catch((err) => console.error(err));
   const nftMetadata = await getNFTMetadataResponse.json();

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { address, collection, chainId } = req.query;
+  const { chainId } = req.query;
 
   var chainName;
   console.log(chainId);
@@ -31,31 +31,38 @@ export default async function handler(req, res) {
     res.status(400).json({ error: "Invalid chainId" });
   }
 
-  var collectionsURLString = "";
-  if (collection) {
-    collectionsURLString = "&contractAddresses[]=" + collection;
-  }
+  var reservesAddresses = [];
 
   const url =
     "https://eth-" +
     chainName +
     ".g.alchemy.com/nft/v2/" +
-    process.env.ALCHEMY_API_KEY +
-    "/getNFTs";
+    process.env.ALCHEMY_API_KEY;
 
   const options = {
-    method: "GET",
+    method: "POST",
     headers: {
       Accept: "application/json",
     },
+    body: {
+      id: 1,
+      jsonrpc: "2.0",
+      method: "eth_getLogs",
+      params: [
+        {
+          address: "0x2763678999b36940808210D46634131dc45f8AD2",
+          topics: [
+            "0xe1866131bb60ded80b1b83df69d15c852b90d58e59bf343600ba772b38d0f031",
+          ],
+        },
+      ],
+    },
   };
-  const getNFTsResponse = await fetch(
-    url + "?owner=" + address + collectionsURLString,
-    options
-  ).catch((err) => console.error(err));
-  const nfts = await getNFTsResponse.json();
+  const getReservesResponse = await fetch(url, options).catch((err) =>
+    console.error(err)
+  );
+  const reserves = await getReservesResponse.json();
+  console.log("getReservesResponse", reserves);
 
-  console.log("nfts", nfts.ownedNfts);
-
-  res.status(200).json(nfts.ownedNfts);
+  res.status(200).json(reserves);
 }
