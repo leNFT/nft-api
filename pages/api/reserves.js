@@ -62,7 +62,12 @@ export default async function handler(req, res) {
     console.error(err)
   );
   const reserves = await getReservesResponse.json();
-  console.log("getReservesResponse", reserves);
+  reserves.result.forEach((result) => {
+    reservesAddresses.push({
+      address: result.topics[1],
+      block: result.blockNumber,
+    });
+  });
 
-  res.status(200).json(reserves);
+  res.status(200).json(reservesAddresses);
 }
