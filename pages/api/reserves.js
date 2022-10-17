@@ -1,5 +1,6 @@
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
+import { utils } from "ethers";
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -54,8 +55,10 @@ export default async function handler(req, res) {
       params: [
         {
           address: marketAddress,
+          fromBlock: "earliest",
+          toBlock: "latest",
           topics: [
-            "0xe1866131bb60ded80b1b83df69d15c852b90d58e59bf343600ba772b38d0f031",
+            "0xd6b6991a74a763fbdaa73930e120d9590a2bcb82cbcb99e8bd873ba570708261",
           ],
         },
       ],
@@ -70,8 +73,8 @@ export default async function handler(req, res) {
   try {
     reserves.result.forEach((result) => {
       reservesAddresses.push({
-        address: result.topics[1],
-        block: result.blockNumber,
+        address: utils.defaultAbiCoder.decode(["address"], result.topics[1]),
+        block: Number(result.blockNumber),
       });
     });
   } catch (error) {
