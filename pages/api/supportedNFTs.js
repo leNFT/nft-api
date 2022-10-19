@@ -21,8 +21,7 @@ export default async function handler(req, res) {
   await cors(req, res);
 
   const { chainId } = req.query;
-  const createReserveTopic =
-    "0x62bc44df7dccd51a32794da404454232658add2bef839a8e3629ed5c980daabf";
+
   const setReserveTopic =
     "0xf9e7f47c2cd7655661046fbcf0164a4d4ac48c3cd9c0ed8b45410e965cc33714";
 
@@ -39,8 +38,7 @@ export default async function handler(req, res) {
     res.status(400).json({ error: "Invalid chainId" });
   }
 
-  var reserves = {};
-  var supportedNFTs = {};
+  var nfts = {};
 
   const url =
     "https://eth-" +
@@ -62,7 +60,7 @@ export default async function handler(req, res) {
           address: marketAddress,
           fromBlock: "earliest",
           toBlock: "latest",
-          topics: [createReserveTopic, setReserveTopic],
+          topics: [setReserveTopic],
         },
       ],
     }),
@@ -74,35 +72,14 @@ export default async function handler(req, res) {
   console.log("response", response);
 
   try {
-    // Go through each event
     response.result.forEach((result) => {
-      if (result.topics[0] == createReserveTopic) {
-        reserves[utils.defaultAbiCoder.decode(["address"], result.topics[1])] =
-          {
-            block: Number(result.blockNumber),
-            assets: [],
-          };
-      } else if (result.topics[0] == setReserveTopic) {
-        response.result.forEach((result) => {
-          supportedNFTs[
-            utils.defaultAbiCoder.decode(["address"], result.topics[1])
-          ] = {
-            reserve: utils.defaultAbiCoder.decode(
-              ["address"],
-              result.topics[3]
-            ),
-          };
-        });
-      }
+      nfts[utils.defaultAbiCoder.decode(["address"], result.topics[1])] = {
+        reserve: utils.defaultAbiCoder.decode(["address"], result.topics[3]),
+      };
     });
-
-    // Build answer
-    for (const [key, value] of Object.entries(supportedNFTs)) {
-      reserves[value].assets.push(key.reserve);
-    }
   } catch (error) {
     console.log(error);
   }
 
-  res.status(200).json(reserves);
+  res.status(200).json(nfts);
 }
