@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     ".g.alchemy.com/v2/" +
     process.env.ALCHEMY_API_KEY;
 
-  const options = {
+  var options = {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -62,46 +62,74 @@ export default async function handler(req, res) {
           address: marketAddress,
           fromBlock: "earliest",
           toBlock: "latest",
-          topics: [createReserveTopic, setReserveTopic],
+          topics: [createReserveTopic],
         },
       ],
     }),
   };
-  const getResponse = await fetch(url, options).catch((err) =>
+  var getResponse = await fetch(url, options).catch((err) =>
     console.error(err)
   );
-  const response = await getResponse.json();
-  console.log("response", response);
+  var response = await getResponse.json();
 
   try {
     // Go through each event
-    response.result.forEach((result) => {
-      if (result.topics[0] == createReserveTopic) {
-        reserves[utils.defaultAbiCoder.decode(["address"], result.topics[1])] =
-          {
-            block: Number(result.blockNumber),
-            assets: [],
-          };
-      } else if (result.topics[0] == setReserveTopic) {
-        response.result.forEach((result) => {
-          supportedNFTs[
-            utils.defaultAbiCoder.decode(["address"], result.topics[1])
-          ] = {
-            reserve: utils.defaultAbiCoder.decode(
-              ["address"],
-              result.topics[3]
-            ),
-          };
-        });
-      }
+    response.result.forEach((element) => {
+      reserves[utils.defaultAbiCoder.decode(["address"], element.data)] = {
+        block: Number(element.blockNumber),
+        assets: [],
+      };
     });
-
-    // Build answer
-    for (const [key, value] of Object.entries(supportedNFTs)) {
-      reserves[value].assets.push(key.reserve);
-    }
   } catch (error) {
     console.log(error);
+  }
+
+  options = {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      id: 1,
+      jsonrpc: "2.0",
+      method: "eth_getLogs",
+      params: [
+        {
+          address: marketAddress,
+          fromBlock: "earliest",
+          toBlock: "latest",
+          topics: [setReserveTopic],
+        },
+      ],
+    }),
+  };
+  getResponse = await fetch(url, options).catch((err) => console.error(err));
+  response = await getResponse.json();
+
+  try {
+    response.result.forEach((element) => {
+      console.log("element", element.topics);
+      supportedNFTs[
+        utils.defaultAbiCoder.decode(["address"], element.topics[1])
+      ] = {
+        reserve: utils.defaultAbiCoder.decode(
+          ["address"],
+          element.topics[3]
+        )[0],
+      };
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  console.log("reserves", reserves);
+  console.log("supportedNFTs", supportedNFTs);
+
+  // Build answer
+  for (const [key, value] of Object.entries(supportedNFTs)) {
+    console.log("key", key);
+    console.log("value", value);
+    reserves[value.reserve].assets.push(key);
   }
 
   res.status(200).json(reserves);

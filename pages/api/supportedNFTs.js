@@ -74,7 +74,7 @@ export default async function handler(req, res) {
   try {
     response.result.forEach((result) => {
       nfts[utils.defaultAbiCoder.decode(["address"], result.topics[1])] = {
-        reserve: utils.defaultAbiCoder.decode(["address"], result.topics[3]),
+        reserve: utils.defaultAbiCoder.decode(["address"], result.topics[3])[0],
       };
     });
   } catch (error) {
