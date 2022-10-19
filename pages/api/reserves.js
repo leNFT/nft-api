@@ -75,7 +75,7 @@ export default async function handler(req, res) {
   try {
     // Go through each event
     response.result.forEach((element) => {
-      reserves[utils.defaultAbiCoder.decode(["address"], element.data)] = {
+      reserves[utils.defaultAbiCoder.decode(["address"], element.topics[1])] = {
         block: Number(element.blockNumber),
         assets: [],
       };
