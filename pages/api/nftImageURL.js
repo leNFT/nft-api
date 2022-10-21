@@ -22,22 +22,19 @@ export default async function handler(req, res) {
   const { address, tokenId, chainId } = req.query;
 
   var chainName;
-  var apiKey;
   if (chainId == 1) {
-    chainName = "eth";
-    apiKey = process.env.MAINNET_ALCHEMY_API_KEY;
+    chainName = "mainnet";
   } else if (chainId == 5) {
     chainName = "goerli";
-    apiKey = process.env.GOERLI_ALCHEMY_API_KEY;
   } else {
-    res.status(400).json({ error: "Invalid chainId" });
+    return "Unsupported ChainID";
   }
 
   const url =
     "https://eth-" +
     chainName +
     ".g.alchemy.com/nft/v2/" +
-    apiKey +
+    process.env.ALCHEMY_API_KEY +
     "/getNFTMetadata";
 
   const options = {
