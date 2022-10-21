@@ -23,10 +23,13 @@ export default async function handler(req, res) {
 
   var chainName;
   console.log(chainId);
+  var apiKey;
   if (chainId == 1) {
     chainName = "eth";
+    apiKey = process.env.MAINNET_ALCHEMY_API_KEY;
   } else if (chainId == 5) {
     chainName = "goerli";
+    apiKey = process.env.GOERLI_ALCHEMY_API_KEY;
   } else {
     res.status(400).json({ error: "Invalid chainId" });
   }
@@ -37,11 +40,7 @@ export default async function handler(req, res) {
   }
 
   const url =
-    "https://eth-" +
-    chainName +
-    ".g.alchemy.com/nft/v2/" +
-    process.env.ALCHEMY_API_KEY +
-    "/getNFTs";
+    "https://eth-" + chainName + ".g.alchemy.com/nft/v2/" + apiKey + "/getNFTs";
 
   const options = {
     method: "GET",
