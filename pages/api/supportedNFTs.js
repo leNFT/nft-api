@@ -27,24 +27,24 @@ export default async function handler(req, res) {
 
   var chainName;
   var marketAddress;
-  var apiKey;
-
   console.log(chainId);
   if (chainId == 1) {
     chainName = "eth";
     marketAddress = process.env.MAINNET_MARKET_CONTRACT;
-    apiKey = process.env.MAINNET_ALCHEMY_API_KEY;
   } else if (chainId == 5) {
     chainName = "goerli";
     marketAddress = process.env.GOERLI_MARKET_CONTRACT;
-    apiKey = process.env.GOERLI_ALCHEMY_API_KEY;
   } else {
     res.status(400).json({ error: "Invalid chainId" });
   }
 
   var nfts = {};
 
-  const url = "https://eth-" + chainName + ".g.alchemy.com/v2/" + apiKey;
+  const url =
+    "https://eth-" +
+    chainName +
+    ".g.alchemy.com/v2/" +
+    process.env.ALCHEMY_API_KEY;
 
   const options = {
     method: "POST",
