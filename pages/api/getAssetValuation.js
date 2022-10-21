@@ -10,9 +10,11 @@ export async function getAssetValuation(collection, tokenId) {
     },
   };
 
-  // Test collection case for goerli
+  // Test collections case for goerli
   if (collection == "0x0171dB1e3Cc005d2A6E0BA531509D007a5B8C1a8") {
     return parseUnits("0.025", 18);
+  } else if (collection == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
+    return parseUnits("0.008", 18);
   }
 
   const url = "https://api.upshot.xyz/v2/assets/" + collection + "/" + tokenId;
