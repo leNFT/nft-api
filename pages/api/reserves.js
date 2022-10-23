@@ -160,7 +160,9 @@ export default async function handler(req, res) {
     console.log("name response", collectionNameResponse);
     reserves[value.reserve].assets.push({
       address: key,
-      name: utils.toUtf8String(collectionNameResponse.result),
+      name: utils.toUtf8String(
+        "0x" + collectionNameResponse.result.substring(130).replace(/0+$/, "")
+      ),
     });
   }
 
