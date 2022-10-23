@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ethersproject/bignumber": "^5.7.0",
     "cors": "^2.8.5",
     "eip-712": "^1.0.0",
     "ethers": "^5.6.9",

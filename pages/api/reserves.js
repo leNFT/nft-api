@@ -1,6 +1,7 @@
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import { utils } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -42,13 +43,13 @@ export default async function handler(req, res) {
   var reserves = {};
   var supportedNFTs = {};
 
-  const url =
+  const baseUrl =
     "https://eth-" +
     chainName +
     ".g.alchemy.com/v2/" +
     process.env.ALCHEMY_API_KEY;
 
-  var options = {
+  const getReservesOptions = {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -67,24 +68,25 @@ export default async function handler(req, res) {
       ],
     }),
   };
-  var getResponse = await fetch(url, options).catch((err) =>
-    console.error(err)
+  const getReservesResponse = await fetch(baseUrl, getReservesOptions).catch(
+    (err) => console.error(err)
   );
-  var response = await getResponse.json();
+  const reservesResponse = await getReservesResponse.json();
 
   try {
     // Go through each event
-    response.result.forEach((element) => {
+    reservesResponse.result.forEach((element) => {
       reserves[utils.defaultAbiCoder.decode(["address"], element.topics[1])] = {
         block: Number(element.blockNumber),
         assets: [],
+        balance: "",
       };
     });
   } catch (error) {
     console.log(error);
   }
 
-  options = {
+  const getSupportedNFTsOptions = {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -103,11 +105,14 @@ export default async function handler(req, res) {
       ],
     }),
   };
-  getResponse = await fetch(url, options).catch((err) => console.error(err));
-  response = await getResponse.json();
+  const getSupportedNFTsResponse = await fetch(
+    baseUrl,
+    getSupportedNFTsOptions
+  ).catch((err) => console.error(err));
+  const supportedNFTsResponse = await getSupportedNFTsResponse.json();
 
   try {
-    response.result.forEach((element) => {
+    supportedNFTsResponse.result.forEach((element) => {
       console.log("element", element.topics);
       supportedNFTs[
         utils.defaultAbiCoder.decode(["address"], element.topics[1])
@@ -125,11 +130,70 @@ export default async function handler(req, res) {
   console.log("reserves", reserves);
   console.log("supportedNFTs", supportedNFTs);
 
-  // Build answer
+  // Add details about the reserve to the response
+  const getNameFunctionSig = "0x06fdde03";
+
+  // Get NFT names and add them to response
   for (const [key, value] of Object.entries(supportedNFTs)) {
     console.log("key", key);
     console.log("value", value);
-    reserves[value.reserve].assets.push(key);
+
+    const getCollectionNameOptions = {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{ to: key, data: getNameFunctionSig }],
+      }),
+    };
+
+    const getCollectionNameResponse = await fetch(
+      baseUrl,
+      getCollectionNameOptions
+    ).catch((err) => console.error(err));
+    const collectionNameResponse = await getCollectionNameResponse.json();
+    console.log("name response", collectionNameResponse);
+    reserves[value.reserve].assets.push({
+      address: key,
+      name: utils.toUtf8String(collectionNameResponse.result),
+    });
+  }
+
+  // Add details about the reserve to the response
+  const getUnderlyingFunctionSig = "0xe2c67439";
+
+  for (const key in reserves) {
+    console.log("key", key);
+    // Get reserve underlying balance and add it to the response
+    const getUnderlyingOptions = {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{ to: key, data: getUnderlyingFunctionSig }],
+      }),
+    };
+
+    const getUnderlyingResponse = await fetch(
+      baseUrl,
+      getUnderlyingOptions
+    ).catch((err) => console.error(err));
+    const underlyingResponse = await getUnderlyingResponse.json();
+    console.log("underlyingResponse", underlyingResponse);
+
+    reserves[key].balance = BigNumber.from(
+      underlyingResponse.result
+    ).toString();
   }
 
   res.status(200).json(reserves);
