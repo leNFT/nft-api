@@ -2,6 +2,7 @@ import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import { utils } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
+import { Network, Alchemy } from "alchemy-sdk";
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -27,57 +28,31 @@ export default async function handler(req, res) {
   const setReserveTopic =
     "0xf9e7f47c2cd7655661046fbcf0164a4d4ac48c3cd9c0ed8b45410e965cc33714";
 
-  var chainName;
-  var marketAddress;
-  console.log(chainId);
-  if (chainId == 1) {
-    chainName = "eth";
-    marketAddress = process.env.MAINNET_MARKET_CONTRACT;
-  } else if (chainId == 5) {
-    chainName = "goerli";
-    marketAddress = process.env.GOERLI_MARKET_CONTRACT;
-  } else {
-    res.status(400).json({ error: "Invalid chainId" });
-  }
+  const alchemySettings = {
+    apiKey: process.env.ALCHEMY_API_KEY, // Replace with your Alchemy API Key.
+    network: chainId == 1 ? Network.ETH_MAINNET : Network.ETH_GOERLI, // Replace with your network.
+  };
+  const alchemy = new Alchemy(alchemySettings);
+
+  const marketAddress =
+    chainId == 1
+      ? process.env.MAINNET_MARKET_CONTRACT
+      : process.env.GOERLI_MARKET_CONTRACT;
 
   var reserves = {};
   var supportedNFTs = {};
 
-  const baseUrl =
-    "https://eth-" +
-    chainName +
-    ".g.alchemy.com/v2/" +
-    process.env.ALCHEMY_API_KEY;
-
-  const getReservesOptions = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      id: 1,
-      jsonrpc: "2.0",
-      method: "eth_getLogs",
-      params: [
-        {
-          address: marketAddress,
-          fromBlock: "earliest",
-          toBlock: "latest",
-          topics: [createReserveTopic],
-        },
-      ],
-    }),
-  };
-  const getReservesResponse = await fetch(baseUrl, getReservesOptions).catch(
-    (err) => console.error(err)
-  );
-  const reservesResponse = await getReservesResponse.json();
+  const reservesResponse = await alchemy.core.getLogs({
+    address: marketAddress,
+    fromBlock: "earliest",
+    toBlock: "latest",
+    topics: [createReserveTopic],
+  });
 
   try {
     // Go through each event
-    reservesResponse.result.forEach((element) => {
+    reservesResponse.forEach((element) => {
       reserves[utils.defaultAbiCoder.decode(["address"], element.topics[1])] = {
-        block: Number(element.blockNumber),
         assets: [],
         balance: "",
       };
@@ -86,33 +61,15 @@ export default async function handler(req, res) {
     console.log(error);
   }
 
-  const getSupportedNFTsOptions = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      id: 1,
-      jsonrpc: "2.0",
-      method: "eth_getLogs",
-      params: [
-        {
-          address: marketAddress,
-          fromBlock: "earliest",
-          toBlock: "latest",
-          topics: [setReserveTopic],
-        },
-      ],
-    }),
-  };
-  const getSupportedNFTsResponse = await fetch(
-    baseUrl,
-    getSupportedNFTsOptions
-  ).catch((err) => console.error(err));
-  const supportedNFTsResponse = await getSupportedNFTsResponse.json();
+  const supportedNFTsResponse = await alchemy.core.getLogs({
+    address: marketAddress,
+    fromBlock: "earliest",
+    toBlock: "latest",
+    topics: [setReserveTopic],
+  });
 
   try {
-    supportedNFTsResponse.result.forEach((element) => {
+    supportedNFTsResponse.forEach((element) => {
       console.log("element", element.topics);
       supportedNFTs[
         utils.defaultAbiCoder.decode(["address"], element.topics[1])
@@ -138,64 +95,47 @@ export default async function handler(req, res) {
     console.log("key", key);
     console.log("value", value);
 
-    const getCollectionNameOptions = {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        id: 1,
-        jsonrpc: "2.0",
-        method: "eth_call",
-        params: [{ to: key, data: getNameFunctionSig }],
-      }),
-    };
-
-    const getCollectionNameResponse = await fetch(
-      baseUrl,
-      getCollectionNameOptions
-    ).catch((err) => console.error(err));
-    const collectionNameResponse = await getCollectionNameResponse.json();
+    const collectionNameResponse = await alchemy.core.call({
+      to: key,
+      data: getNameFunctionSig,
+    });
     console.log("name response", collectionNameResponse);
     reserves[value.reserve].assets.push({
       address: key,
       name: utils.toUtf8String(
-        "0x" + collectionNameResponse.result.substring(130).replace(/0+$/, "")
+        "0x" + collectionNameResponse.substring(130).replace(/0+$/, "")
       ),
     });
   }
 
   // Add details about the reserve to the response
   const getUnderlyingFunctionSig = "0xe2c67439";
+  const getSupplyRateFunctionSig = "0x84bdc9a8";
+  const getBorrowRateFunctionSig = "0xba1c5e80";
 
   for (const key in reserves) {
     console.log("key", key);
-    // Get reserve underlying balance and add it to the response
-    const getUnderlyingOptions = {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        id: 1,
-        jsonrpc: "2.0",
-        method: "eth_call",
-        params: [{ to: key, data: getUnderlyingFunctionSig }],
-      }),
-    };
 
-    const getUnderlyingResponse = await fetch(
-      baseUrl,
-      getUnderlyingOptions
-    ).catch((err) => console.error(err));
-    const underlyingResponse = await getUnderlyingResponse.json();
+    const underlyingResponse = await alchemy.core.call({
+      to: key,
+      data: getUnderlyingFunctionSig,
+    });
     console.log("underlyingResponse", underlyingResponse);
+    reserves[key].balance = BigNumber.from(underlyingResponse).toString();
 
-    reserves[key].balance = BigNumber.from(
-      underlyingResponse.result
-    ).toString();
+    const supplyRateResponse = await alchemy.core.call({
+      to: key,
+      data: getSupplyRateFunctionSig,
+    });
+    console.log("supplyRateResponse", supplyRateResponse);
+    reserves[key].supplyRate = BigNumber.from(supplyRateResponse).toNumber();
+
+    const borrowRateResponse = await alchemy.core.call({
+      to: key,
+      data: getBorrowRateFunctionSig,
+    });
+    console.log("borrowRateResponse", borrowRateResponse);
+    reserves[key].borrowRate = BigNumber.from(borrowRateResponse).toNumber();
   }
 
   res.status(200).json(reserves);
