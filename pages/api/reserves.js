@@ -107,7 +107,7 @@ export default async function handler(req, res) {
     console.log("name response", collectionNameResponse);
     reserves[value.reserve].assets.push({
       address: key,
-      name: utils.defaultAbiCoder.decode(["string"], collectionNameResponse),
+      name: utils.defaultAbiCoder.decode(["string"], collectionNameResponse)[0],
     });
   }
 
@@ -159,7 +159,7 @@ export default async function handler(req, res) {
     reserves[key].isIncentivized = utils.defaultAbiCoder.decode(
       ["bool"],
       incentivesResponse
-    );
+    )[0];
   }
 
   res.status(200).json(reserves);
