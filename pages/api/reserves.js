@@ -107,9 +107,7 @@ export default async function handler(req, res) {
     console.log("name response", collectionNameResponse);
     reserves[value.reserve].assets.push({
       address: key,
-      name: utils.toUtf8String(
-        "0x" + collectionNameResponse.substring(130).replace(/0+$/, "")
-      ),
+      name: utils.defaultAbiCoder.decode(["string"], collectionNameResponse),
     });
   }
 
@@ -153,10 +151,15 @@ export default async function handler(req, res) {
 
     const incentivesResponse = await alchemy.core.call({
       to: nativeTokenVaultAddress,
-      data: getReserveIncentivizedFunctionSig + key.substring(2),
+      data:
+        getReserveIncentivizedFunctionSig +
+        utils.defaultAbiCoder.encode(["address"], [key]).substring(2),
     });
     console.log("incentivesResponse", incentivesResponse);
-    reserves[key].isIncentivized = incentivesResponse;
+    reserves[key].isIncentivized = utils.defaultAbiCoder.decode(
+      ["bool"],
+      incentivesResponse
+    );
   }
 
   res.status(200).json(reserves);
