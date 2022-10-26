@@ -29,8 +29,8 @@ export default async function handler(req, res) {
     "0xf9e7f47c2cd7655661046fbcf0164a4d4ac48c3cd9c0ed8b45410e965cc33714";
 
   const alchemySettings = {
-    apiKey: process.env.ALCHEMY_API_KEY, // Replace with your Alchemy API Key.
-    network: chainId == 1 ? Network.ETH_MAINNET : Network.ETH_GOERLI, // Replace with your network.
+    apiKey: process.env.ALCHEMY_API_KEY,
+    network: chainId == 1 ? Network.ETH_MAINNET : Network.ETH_GOERLI,
   };
   const alchemy = new Alchemy(alchemySettings);
 
@@ -38,6 +38,11 @@ export default async function handler(req, res) {
     chainId == 1
       ? process.env.MAINNET_MARKET_CONTRACT
       : process.env.GOERLI_MARKET_CONTRACT;
+
+  const nativeTokenVaultAddress =
+    chainId == 1
+      ? process.env.MAINNET_NATIVE_TOKEN_VAULT_CONTRACT
+      : process.env.GOERLI_NATIVE_TOKEN_VAULT_CONTRACT;
 
   var reserves = {};
   var supportedNFTs = {};
@@ -113,6 +118,7 @@ export default async function handler(req, res) {
   const getDebtFunctionSig = "0x14a6bf0f";
   const getSupplyRateFunctionSig = "0x84bdc9a8";
   const getBorrowRateFunctionSig = "0xba1c5e80";
+  const getReserveIncentivizedFunctionSig = "0x453cd60e";
 
   for (const key in reserves) {
     console.log("key", key);
@@ -144,6 +150,13 @@ export default async function handler(req, res) {
     });
     console.log("borrowRateResponse", borrowRateResponse);
     reserves[key].borrowRate = BigNumber.from(borrowRateResponse).toNumber();
+
+    const incentivesResponse = await alchemy.core.call({
+      to: nativeTokenVaultAddress,
+      data: getReserveIncentivizedFunctionSig + key,
+    });
+    console.log("incentivesResponse", incentivesResponse);
+    reserves[key].isIncentivized = incentivesResponse;
   }
 
   res.status(200).json(reserves);
