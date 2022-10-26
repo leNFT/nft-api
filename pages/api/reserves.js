@@ -153,7 +153,7 @@ export default async function handler(req, res) {
 
     const incentivesResponse = await alchemy.core.call({
       to: nativeTokenVaultAddress,
-      data: getReserveIncentivizedFunctionSig + key,
+      data: getReserveIncentivizedFunctionSig + key.substring(2),
     });
     console.log("incentivesResponse", incentivesResponse);
     reserves[key].isIncentivized = incentivesResponse;
