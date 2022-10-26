@@ -1,6 +1,7 @@
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import { utils } from "ethers";
+import { Network, Alchemy } from "alchemy-sdk";
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -20,66 +21,67 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { chainId } = req.query;
+  const { chainId, reserve } = req.query;
 
   const setReserveTopic =
     "0xf9e7f47c2cd7655661046fbcf0164a4d4ac48c3cd9c0ed8b45410e965cc33714";
 
-  var chainName;
-  var marketAddress;
-  console.log(chainId);
-  if (chainId == 1) {
-    chainName = "eth";
-    marketAddress = process.env.MAINNET_MARKET_CONTRACT;
-  } else if (chainId == 5) {
-    chainName = "goerli";
-    marketAddress = process.env.GOERLI_MARKET_CONTRACT;
-  } else {
-    res.status(400).json({ error: "Invalid chainId" });
-  }
+  const alchemySettings = {
+    apiKey: process.env.ALCHEMY_API_KEY,
+    network: chainId == 1 ? Network.ETH_MAINNET : Network.ETH_GOERLI,
+  };
+  const alchemy = new Alchemy(alchemySettings);
+
+  const marketAddress =
+    chainId == 1
+      ? process.env.MAINNET_MARKET_CONTRACT
+      : process.env.GOERLI_MARKET_CONTRACT;
 
   var nfts = {};
 
-  const url =
-    "https://eth-" +
-    chainName +
-    ".g.alchemy.com/v2/" +
-    process.env.ALCHEMY_API_KEY;
+  const response = await alchemy.core.getLogs({
+    address: marketAddress,
+    fromBlock: "earliest",
+    toBlock: "latest",
+    topics: [setReserveTopic],
+  });
 
-  const options = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      id: 1,
-      jsonrpc: "2.0",
-      method: "eth_getLogs",
-      params: [
-        {
-          address: marketAddress,
-          fromBlock: "earliest",
-          toBlock: "latest",
-          topics: [setReserveTopic],
-        },
-      ],
-    }),
-  };
-  const getResponse = await fetch(url, options).catch((err) =>
-    console.error(err)
-  );
-  const response = await getResponse.json();
   console.log("response", response);
+  const getNameFunctionSig = "0x06fdde03";
 
-  try {
-    response.result.forEach((result) => {
-      nfts[utils.defaultAbiCoder.decode(["address"], result.topics[1])] = {
-        reserve: utils.defaultAbiCoder.decode(["address"], result.topics[3])[0],
-      };
+  for (let i = 0; i < response.length; i++) {
+    const result = response[i];
+
+    const nftAddress = utils.defaultAbiCoder.decode(
+      ["address"],
+      result.topics[1]
+    )[0];
+
+    console.log("nftAddress", nftAddress);
+    const collectionNameResponse = await alchemy.core.call({
+      to: nftAddress,
+      data: getNameFunctionSig,
     });
-  } catch (error) {
-    console.log(error);
+
+    console.log("collectionNameResponse", collectionNameResponse);
+
+    nfts[nftAddress] = {
+      reserve: utils.defaultAbiCoder.decode(["address"], result.topics[3])[0],
+      name: utils.defaultAbiCoder.decode(["string"], collectionNameResponse)[0],
+    };
   }
 
-  res.status(200).json(nfts);
+  // If the user is asking for nfts supported by a specific reserve
+  console.log("reserve", reserve);
+  if (reserve) {
+    var reserveNFTs = {};
+    for (const nftAddress in nfts) {
+      if (nfts[nftAddress].reserve == reserve) {
+        reserveNFTs[nftAddress] = nfts[nftAddress];
+      }
+    }
+    res.status(200).json(reserveNFTs);
+  } else {
+    res.status(200).json(nfts);
+  }
 }
