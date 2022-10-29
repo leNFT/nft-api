@@ -112,8 +112,7 @@ export default async function handler(req, res) {
   }
 
   // Add details about the reserve to the response
-  const getUnderlyingFunctionSig = "0xe2c67439";
-  const getDebtFunctionSig = "0x14a6bf0f";
+  const getTVLFunctionSig = "0x97b3fcaa";
   const getSupplyRateFunctionSig = "0x84bdc9a8";
   const getBorrowRateFunctionSig = "0xba1c5e80";
   const getReserveIncentivizedFunctionSig = "0x453cd60e";
@@ -121,19 +120,12 @@ export default async function handler(req, res) {
   for (const key in reserves) {
     console.log("key", key);
 
-    const underlyingResponse = await alchemy.core.call({
+    const tvlResponse = await alchemy.core.call({
       to: key,
-      data: getUnderlyingFunctionSig,
+      data: getTVLFunctionSig,
     });
-    console.log("underlyingResponse", underlyingResponse);
-    const debtResponse = await alchemy.core.call({
-      to: key,
-      data: getDebtFunctionSig,
-    });
-    console.log("debtResponse", debtResponse);
-    reserves[key].tvl = BigNumber.from(underlyingResponse)
-      .add(debtResponse)
-      .toString();
+    console.log("tvlResponse", tvlResponse);
+    reserves[key].tvl = BigNumber.from(tvlResponse).toNumber();
 
     const supplyRateResponse = await alchemy.core.call({
       to: key,
