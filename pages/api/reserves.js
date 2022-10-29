@@ -125,7 +125,7 @@ export default async function handler(req, res) {
       data: getTVLFunctionSig,
     });
     console.log("tvlResponse", tvlResponse);
-    reserves[key].tvl = BigNumber.from(tvlResponse).toNumber();
+    reserves[key].tvl = BigNumber.from(tvlResponse).toString();
 
     const supplyRateResponse = await alchemy.core.call({
       to: key,
