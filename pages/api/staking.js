@@ -2,7 +2,6 @@ import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import { utils } from "ethers";
 import { Network, Alchemy } from "alchemy-sdk";
-import contractAddresses from "../../contractAddresses.json";
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -33,15 +32,15 @@ export default async function handler(req, res) {
   };
   const alchemy = new Alchemy(alchemySettings);
 
-  const addresses =
-    chainId in contractAddresses
-      ? contractAddresses[chainId]
-      : contractAddresses["1"];
+  const marketAddress =
+    chainId == 1
+      ? process.env.MAINNET_MARKET_CONTRACT
+      : process.env.GOERLI_MARKET_CONTRACT;
 
   var nfts = {};
 
   const response = await alchemy.core.getLogs({
-    address: addresses.Market,
+    address: marketAddress,
     fromBlock: "earliest",
     toBlock: "latest",
     topics: [setReserveTopic],
