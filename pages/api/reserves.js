@@ -34,21 +34,16 @@ export default async function handler(req, res) {
   };
   const alchemy = new Alchemy(alchemySettings);
 
-  const marketAddress =
-    chainId == 1
-      ? process.env.MAINNET_MARKET_CONTRACT
-      : process.env.GOERLI_MARKET_CONTRACT;
-
-  const nativeTokenVaultAddress =
-    chainId == 1
-      ? process.env.MAINNET_NATIVE_TOKEN_VAULT_CONTRACT
-      : process.env.GOERLI_NATIVE_TOKEN_VAULT_CONTRACT;
+  const addresses =
+    chainId in contractAddresses
+      ? contractAddresses[chainId]
+      : contractAddresses["1"];
 
   var reserves = {};
   var supportedNFTs = {};
 
   const reservesResponse = await alchemy.core.getLogs({
-    address: marketAddress,
+    address: addresses.Market,
     fromBlock: "earliest",
     toBlock: "latest",
     topics: [createReserveTopic],
@@ -67,7 +62,7 @@ export default async function handler(req, res) {
   }
 
   const supportedNFTsResponse = await alchemy.core.getLogs({
-    address: marketAddress,
+    address: addresses.Market,
     fromBlock: "earliest",
     toBlock: "latest",
     topics: [setReserveTopic],
@@ -142,7 +137,7 @@ export default async function handler(req, res) {
     reserves[key].borrowRate = BigNumber.from(borrowRateResponse).toNumber();
 
     const incentivesResponse = await alchemy.core.call({
-      to: nativeTokenVaultAddress,
+      to: addresses.NativeTokenVault,
       data:
         getReserveIncentivizedFunctionSig +
         utils.defaultAbiCoder.encode(["address"], [key]).substring(2),

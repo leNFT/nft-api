@@ -33,14 +33,12 @@ export default async function handler(req, res) {
   };
   const alchemy = new Alchemy(alchemySettings);
 
-  console.log("contractAddresses", contractAddresses);
   const addresses =
     chainId in contractAddresses
       ? contractAddresses[chainId]
       : contractAddresses["1"];
 
   var nfts = {};
-  console.log("addresses", addresses);
 
   const response = await alchemy.core.getLogs({
     address: addresses.Market,
@@ -49,7 +47,6 @@ export default async function handler(req, res) {
     topics: [setReserveTopic],
   });
 
-  console.log("response", response);
   const getNameFunctionSig = "0x06fdde03";
 
   for (let i = 0; i < response.length; i++) {
