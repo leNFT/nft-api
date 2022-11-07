@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
   const getRewardsFunctionSig = "0x0572b0cc";
   const getRewardsPeriodFunctionSig = "0xcd155e47";
-  const getBalanceFunctionSig = "0xf8b2cb4fs";
+  const getBalanceFunctionSig = "0x70a08231";
 
   // Get the Rewards
   const rewardsResponse = await alchemy.core.call({

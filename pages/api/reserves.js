@@ -2,6 +2,7 @@ import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import { utils } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
+import contractAddresses from "../../contractAddresses.json";
 import { Network, Alchemy } from "alchemy-sdk";
 
 // Initialize the cors middleware
