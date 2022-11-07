@@ -1,7 +1,9 @@
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { Network, Alchemy } from "alchemy-sdk";
+
+const SECONDS_IN_YEAR = 31556926;
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -21,10 +23,7 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { chainId, reserve } = req.query;
-
-  const setReserveTopic =
-    "0xf9e7f47c2cd7655661046fbcf0164a4d4ac48c3cd9c0ed8b45410e965cc33714";
+  const { chainId } = req.query;
 
   const alchemySettings = {
     apiKey: process.env.ALCHEMY_API_KEY,
@@ -32,56 +31,56 @@ export default async function handler(req, res) {
   };
   const alchemy = new Alchemy(alchemySettings);
 
-  const marketAddress =
-    chainId == 1
-      ? process.env.MAINNET_MARKET_CONTRACT
-      : process.env.GOERLI_MARKET_CONTRACT;
+  const addresses =
+    chainId in contractAddresses
+      ? contractAddresses[chainId]
+      : contractAddresses["1"];
 
-  var nfts = {};
+  var stakingDetails = {};
 
-  const response = await alchemy.core.getLogs({
-    address: marketAddress,
-    fromBlock: "earliest",
-    toBlock: "latest",
-    topics: [setReserveTopic],
+  const getRewardsFunctionSig = "0x0572b0cc";
+  const getRewardsPeriodFunctionSig = "0xcd155e47";
+  const getBalanceFunctionSig = "0xf8b2cb4fs";
+
+  // Get the Rewards
+  const rewardsResponse = await alchemy.core.call({
+    to: addresses.NativeToken,
+    data: getRewardsFunctionSig,
   });
+  console.log("rewardsResponse", rewardsResponse);
 
-  console.log("response", response);
-  const getNameFunctionSig = "0x06fdde03";
+  // Get the rewards period
+  const rewardsPeriodResponse = await alchemy.core.call({
+    to: addresses.NativeToken,
+    data: getRewardsPeriodFunctionSig,
+  });
+  console.log("rewardsPeriodResponse", rewardsPeriodResponse);
 
-  for (let i = 0; i < response.length; i++) {
-    const result = response[i];
+  // Get the rewards period
+  const vaultBalanceResponse = await alchemy.core.call({
+    to: addresses.NativeToken,
+    data:
+      getBalanceFunctionSig +
+      utils.defaultAbiCoder
+        .encode(["address"], [addresses.NativeTokenVault])
+        .substring(2),
+  });
+  console.log("vaultBalanceResponse", vaultBalanceResponse);
 
-    const nftAddress = utils.defaultAbiCoder.decode(
-      ["address"],
-      result.topics[1]
-    )[0];
-
-    console.log("nftAddress", nftAddress);
-    const collectionNameResponse = await alchemy.core.call({
-      to: nftAddress,
-      data: getNameFunctionSig,
-    });
-
-    console.log("collectionNameResponse", collectionNameResponse);
-
-    nfts[nftAddress] = {
-      reserve: utils.defaultAbiCoder.decode(["address"], result.topics[3])[0],
-      name: utils.defaultAbiCoder.decode(["string"], collectionNameResponse)[0],
-    };
+  // Calculate and add APY and APR to response
+  var stakingAPR = 0;
+  var stakingAPY = 0;
+  if (!BigNumber.from(vaultBalanceResponse).eq(0)) {
+    const numberOfPeriods = SECONDS_IN_YEAR / rewardsPeriodResponse;
+    stakingAPR = BigNumber.from(rewardsResponse)
+      .div(rewardsPeriodResponse)
+      .mul(SECONDS_IN_YEAR)
+      .div(vaultBalanceResponse)
+      .mul(10000);
+    stakingAPY = (1 + stakingAPR / numberOfPeriods) ^ (numberOfPeriods - 1);
   }
+  stakingDetails.apr = stakingAPR;
+  stakingDetails.apy = stakingAPY;
 
-  // If the user is asking for nfts supported by a specific reserve
-  console.log("reserve", reserve);
-  if (reserve) {
-    var reserveNFTs = {};
-    for (const nftAddress in nfts) {
-      if (nfts[nftAddress].reserve == reserve) {
-        reserveNFTs[nftAddress] = nfts[nftAddress];
-      }
-    }
-    res.status(200).json(reserveNFTs);
-  } else {
-    res.status(200).json(nfts);
-  }
+  res.status(200).json(stakingDetails);
 }
