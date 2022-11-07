@@ -2,7 +2,7 @@ import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import { BigNumber, utils } from "ethers";
 import { Network, Alchemy } from "alchemy-sdk";
-
+import contractAddresses from "../../contractAddresses.json";
 const SECONDS_IN_YEAR = 31556926;
 
 // Initialize the cors middleware
