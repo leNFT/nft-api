@@ -85,22 +85,16 @@ export default async function handler(req, res) {
     console.log(error);
   }
 
-  console.log("reserves", reserves);
-  console.log("supportedNFTs", supportedNFTs);
-
   // Add details about the reserve to the response
   const getNameFunctionSig = "0x06fdde03";
 
   // Get NFT names and add them to response
   for (const [key, value] of Object.entries(supportedNFTs)) {
-    console.log("key", key);
-    console.log("value", value);
-
     const collectionNameResponse = await alchemy.core.call({
       to: key,
       data: getNameFunctionSig,
     });
-    console.log("name response", collectionNameResponse);
+
     reserves[value.reserve].assets.push({
       address: key,
       name: utils.defaultAbiCoder.decode(["string"], collectionNameResponse)[0],
@@ -114,27 +108,22 @@ export default async function handler(req, res) {
   const getReserveIncentivizedFunctionSig = "0x453cd60e";
 
   for (const key in reserves) {
-    console.log("key", key);
-
     const tvlResponse = await alchemy.core.call({
       to: key,
       data: getTVLFunctionSig,
     });
-    console.log("tvlResponse", tvlResponse);
     reserves[key].tvl = BigNumber.from(tvlResponse).toString();
 
     const supplyRateResponse = await alchemy.core.call({
       to: key,
       data: getSupplyRateFunctionSig,
     });
-    console.log("supplyRateResponse", supplyRateResponse);
     reserves[key].supplyRate = BigNumber.from(supplyRateResponse).toNumber();
 
     const borrowRateResponse = await alchemy.core.call({
       to: key,
       data: getBorrowRateFunctionSig,
     });
-    console.log("borrowRateResponse", borrowRateResponse);
     reserves[key].borrowRate = BigNumber.from(borrowRateResponse).toNumber();
 
     const incentivesResponse = await alchemy.core.call({
@@ -143,7 +132,6 @@ export default async function handler(req, res) {
         getReserveIncentivizedFunctionSig +
         utils.defaultAbiCoder.encode(["address"], [key]).substring(2),
     });
-    console.log("incentivesResponse", incentivesResponse);
     reserves[key].isIncentivized = utils.defaultAbiCoder.decode(
       ["bool"],
       incentivesResponse
