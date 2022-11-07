@@ -4,6 +4,7 @@ import { getMessage } from "eip-712";
 import { getAssetValuation } from "./getAssetValuation.js";
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
+import contractAddresses from "../../contractAddresses.json";
 
 const ONE_HOUR = 3600;
 // Initialize the cors middleware
@@ -26,14 +27,13 @@ export default async function handler(req, res) {
 
   const { requestId, tokenId, address, chainId } = req.query;
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
-  var verifyingContract;
+
+  const addresses =
+    chainId in contractAddresses
+      ? contractAddresses[chainId]
+      : contractAddresses["1"];
 
   console.log("Got a price request for chainID:", chainId);
-  if (chainId == 1) {
-    verifyingContract = process.env.MAINNET_VERIFYING_CONTRACT;
-  } else if (chainId == 5) {
-    verifyingContract = process.env.GOERLI_VERIFYING_CONTRACT;
-  }
   if (!(tokenId && address)) {
     //Check inputs
     res.status(400).json({ error: "Lacks input data" });
@@ -74,7 +74,7 @@ export default async function handler(req, res) {
       name: "leNFT",
       version: "1",
       chainId: chainId,
-      verifyingContract: verifyingContract,
+      verifyingContract: addresses.NFTOracle,
     },
     message: {
       request: requestId,
