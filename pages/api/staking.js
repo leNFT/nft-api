@@ -69,18 +69,16 @@ export default async function handler(req, res) {
 
   // Calculate and add APY and APR to response
   var stakingAPR = 0;
-  var stakingAPY = 0;
   if (!BigNumber.from(vaultBalanceResponse).eq(0)) {
-    const numberOfPeriods = SECONDS_IN_YEAR / rewardsPeriodResponse;
     stakingAPR = BigNumber.from(rewardsResponse)
       .div(rewardsPeriodResponse)
       .mul(SECONDS_IN_YEAR)
       .div(vaultBalanceResponse)
-      .mul(10000);
-    stakingAPY = (1 + stakingAPR / numberOfPeriods) ^ (numberOfPeriods - 1);
+      .mul(100)
+      .toNumber();
   }
   stakingDetails.apr = stakingAPR;
-  stakingDetails.apy = stakingAPY;
+  stakingDetails.rewards = BigNumber.from(rewardsResponse).toString();
 
   res.status(200).json(stakingDetails);
 }
