@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     );
     const asset = await assetResponse.json();
     if (asset.data.appraisal === undefined) {
-      return 0;
+      returnData.price = 0;
     } else {
       const priceEstimate = asset.data.appraisal.wei;
       const multiplier = 0.8;
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     }
   }
 
-  if (requestId) {
+  if (requestId && returnData.price != 0) {
     const payload = abi.encodeParameter(
       {
         AssetPrice: {
