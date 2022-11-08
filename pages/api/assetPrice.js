@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { requestId, tokenId, collection, chainId } = req.query;
+  const { requestId, collection, tokenId, chainId } = req.query;
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
   var returnData = {};
 
@@ -40,20 +40,20 @@ export default async function handler(req, res) {
     res.status(400).json({ error: "Lacks input data" });
   }
 
-  const options = {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "x-api-key": process.env.UPSHOT_API_KEY,
-    },
-  };
-
   // Test collections case for goerli
   if (collection == addresses.GenesisNFT) {
     returnData.price = parseUnits("0.025", 18).toString();
   } else if (collection == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
     returnData.price = parseUnits("0.008", 18).toString();
   } else {
+    const options = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "x-api-key": process.env.UPSHOT_API_KEY,
+      },
+    };
+
     const url =
       "https://api.upshot.xyz/v2/assets/" + collection + "/" + tokenId;
 

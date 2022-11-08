@@ -38,21 +38,21 @@ export default async function handler(req, res) {
 
   var stakingDetails = {};
 
-  const getRewardsFunctionSig = "0x0572b0cc";
-  const getRewardsPeriodFunctionSig = "0xcd155e47";
+  const getStakingRewardsFunctionSig = "0x986768b2";
+  const getStakingRewardsPeriodFunctionSig = "0xec9fedb4";
   const getBalanceFunctionSig = "0x70a08231";
 
   // Get the Rewards
   const rewardsResponse = await alchemy.core.call({
     to: addresses.NativeTokenVault,
-    data: getRewardsFunctionSig,
+    data: getStakingRewardsFunctionSig,
   });
   console.log("rewardsResponse", rewardsResponse);
 
   // Get the rewards period
   const rewardsPeriodResponse = await alchemy.core.call({
     to: addresses.NativeTokenVault,
-    data: getRewardsPeriodFunctionSig,
+    data: getStakingRewardsPeriodFunctionSig,
   });
   console.log("rewardsPeriodResponse", rewardsPeriodResponse);
 
