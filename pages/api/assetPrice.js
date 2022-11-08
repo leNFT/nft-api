@@ -1,10 +1,10 @@
 import abi from "web3-eth-abi";
 import { utils } from "ethers";
 import { getMessage } from "eip-712";
-import { getAssetValuation } from "./getAssetValuation.js";
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import contractAddresses from "../../contractAddresses.json";
+import { parseUnits } from "@ethersproject/units";
 
 const ONE_HOUR = 3600;
 // Initialize the cors middleware
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { requestId, tokenId, address, chainId } = req.query;
+  const { requestId, tokenId, collection, chainId } = req.query;
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
   var returnData = {};
 
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       : contractAddresses["1"];
 
   console.log("Got a price request for chainID:", chainId);
-  if (!(tokenId && address && chainId)) {
+  if (!(tokenId && collection && chainId)) {
     //Check inputs
     res.status(400).json({ error: "Lacks input data" });
   }
@@ -50,27 +50,24 @@ export default async function handler(req, res) {
 
   // Test collections case for goerli
   if (collection == addresses.GenesisNFT) {
-    return parseUnits("0.025", 18);
+    returnData.price = parseUnits("0.025", 18).toString();
   } else if (collection == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
-    return parseUnits("0.008", 18);
-  }
-
-  const url = "https://api.upshot.xyz/v2/assets/" + collection + "/" + tokenId;
-
-  const assetResponse = await fetch(url, options).catch((err) =>
-    console.error(err)
-  );
-  const asset = await assetResponse.json();
-  if (asset.data.appraisal === undefined) {
-    return 0;
+    returnData.price = parseUnits("0.008", 18).toString();
   } else {
-    const priceEstimate = asset.data.appraisal.wei;
-    const multiplier = 0.8;
-    returnData.price = priceEstimate * multiplier;
-  }
+    const url =
+      "https://api.upshot.xyz/v2/assets/" + collection + "/" + tokenId;
 
-  if (returnData.price == 0) {
-    res.status(200).json(returnData);
+    const assetResponse = await fetch(url, options).catch((err) =>
+      console.error(err)
+    );
+    const asset = await assetResponse.json();
+    if (asset.data.appraisal === undefined) {
+      return 0;
+    } else {
+      const priceEstimate = asset.data.appraisal.wei;
+      const multiplier = 0.8;
+      returnData.price = priceEstimate * multiplier;
+    }
   }
 
   if (requestId) {
@@ -83,7 +80,7 @@ export default async function handler(req, res) {
         },
       },
       {
-        collection: address,
+        collection: collection,
         tokenId: tokenId,
         amount: returnData.price,
       }
