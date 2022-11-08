@@ -1,10 +1,10 @@
 import abi from "web3-eth-abi";
 import { utils } from "ethers";
 import { getMessage } from "eip-712";
-import { getAssetValuation } from "./getAssetValuation.js";
 import Cors from "cors";
 import initMiddleware from "../../lib/init-middleware";
 import contractAddresses from "../../contractAddresses.json";
+import airdropAddressesList from "../../airdropAddresses.json";
 
 const ONE_HOUR = 3600;
 // Initialize the cors middleware
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { requestId, tokenId, address, chainId } = req.query;
+  const { requestId, address, chainId } = req.query;
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
   var returnData = {};
 
@@ -34,58 +34,35 @@ export default async function handler(req, res) {
       ? contractAddresses[chainId]
       : contractAddresses["1"];
 
-  console.log("Got a price request for chainID:", chainId);
-  if (!(tokenId && address && chainId)) {
+  const airdropAddresses =
+    chainId in airdropAddressesList
+      ? airdropAddressesList[chainId]
+      : airdropAddressesList["1"];
+
+  console.log("Got an airdrop request for chainID:", chainId);
+  if (!address) {
     //Check inputs
     res.status(400).json({ error: "Lacks input data" });
   }
 
-  const options = {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "x-api-key": process.env.UPSHOT_API_KEY,
-    },
-  };
-
-  // Test collections case for goerli
-  if (collection == addresses.GenesisNFT) {
-    return parseUnits("0.025", 18);
-  } else if (collection == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
-    return parseUnits("0.008", 18);
-  }
-
-  const url = "https://api.upshot.xyz/v2/assets/" + collection + "/" + tokenId;
-
-  const assetResponse = await fetch(url, options).catch((err) =>
-    console.error(err)
-  );
-  const asset = await assetResponse.json();
-  if (asset.data.appraisal === undefined) {
-    return 0;
+  if (airdropAddresses[address]) {
+    returnData.amount = airdropAddresses[address];
   } else {
-    const priceEstimate = asset.data.appraisal.wei;
-    const multiplier = 0.8;
-    returnData.price = priceEstimate * multiplier;
-  }
-
-  if (returnData.price == 0) {
+    returnData.amount = 0;
     res.status(200).json(returnData);
   }
 
   if (requestId) {
     const payload = abi.encodeParameter(
       {
-        AssetPrice: {
-          collection: "address",
-          tokenId: "uint256",
+        AirdropDetails: {
+          user: "address",
           amount: "uint256",
         },
       },
       {
-        collection: address,
-        tokenId: tokenId,
-        amount: returnData.price,
+        user: address,
+        amount: airdropAddresses[address],
       }
     );
 
@@ -109,7 +86,7 @@ export default async function handler(req, res) {
         name: "leNFT",
         version: "1",
         chainId: chainId,
-        verifyingContract: addresses.NFTOracle,
+        verifyingContract: addresses.NativeToken,
       },
       message: {
         request: requestId,

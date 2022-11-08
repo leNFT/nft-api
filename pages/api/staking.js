@@ -44,14 +44,14 @@ export default async function handler(req, res) {
 
   // Get the Rewards
   const rewardsResponse = await alchemy.core.call({
-    to: addresses.NativeToken,
+    to: addresses.NativeTokenVault,
     data: getRewardsFunctionSig,
   });
   console.log("rewardsResponse", rewardsResponse);
 
   // Get the rewards period
   const rewardsPeriodResponse = await alchemy.core.call({
-    to: addresses.NativeToken,
+    to: addresses.NativeTokenVault,
     data: getRewardsPeriodFunctionSig,
   });
   console.log("rewardsPeriodResponse", rewardsPeriodResponse);
