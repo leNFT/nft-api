@@ -79,6 +79,7 @@ export default async function handler(req, res) {
   }
   stakingDetails.apr = stakingAPR;
   stakingDetails.rewards = BigNumber.from(rewardsResponse).toString();
+  stakingDetails.vaultBalance = BigNumber.from(vaultBalanceResponse).toString();
 
   res.status(200).json(stakingDetails);
 }
