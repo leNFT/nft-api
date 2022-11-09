@@ -29,22 +29,26 @@ export default async function handler(req, res) {
   const expiryTimestamp = Math.round(Date.now() / 1000) + ONE_HOUR;
   var returnData = {};
 
-  const addresses =
-    chainId in contractAddresses
-      ? contractAddresses[chainId]
-      : contractAddresses["1"];
-
   console.log("Got a price request for chainID:", chainId);
   if (!(tokenId && collection && chainId)) {
     //Check inputs
     res.status(400).json({ error: "Lacks input data" });
   }
 
+  const addresses =
+    chainId in contractAddresses
+      ? contractAddresses[chainId]
+      : contractAddresses["1"];
+
   // Test collections case for goerli
-  if (collection == addresses.GenesisNFT) {
-    returnData.price = parseUnits("0.025", 18).toString();
-  } else if (collection == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
-    returnData.price = parseUnits("0.008", 18).toString();
+  if (chainId == "5") {
+    if (collection == addresses.GenesisNFT) {
+      returnData.price = parseUnits("0.025", 18).toString();
+    } else if (collection == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
+      returnData.price = parseUnits("0.008", 18).toString();
+    } else if (collection == "0x0171dB1e3Cc005d2A6E0BA531509D007a5B8C1a8") {
+      returnData.price = parseUnits("0.01", 18).toString();
+    }
   } else {
     const options = {
       method: "GET",
