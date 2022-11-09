@@ -48,7 +48,10 @@ export default async function handler(req, res) {
       returnData.price = parseUnits("0.008", 18).toString();
     } else if (collection == "0x0171dB1e3Cc005d2A6E0BA531509D007a5B8C1a8") {
       returnData.price = parseUnits("0.01", 18).toString();
+    } else if (collection == "0x932Ca55B9Ef0b3094E8Fa82435b3b4c50d713043") {
+      returnData.price = parseUnits("0.01", 18).toString();
     }
+    // Mainnet Case
   } else {
     const options = {
       method: "GET",
