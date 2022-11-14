@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
   const getStakingRewardsFunctionSig = "0x986768b2";
   const getStakingRewardsPeriodFunctionSig = "0xec9fedb4";
-  const getBalanceFunctionSig = "0x70a08231";
+  const totalAssetsFunctionSig = "0x01e1d114";
 
   // Get the Rewards
   const rewardsResponse = await alchemy.core.call({
@@ -58,12 +58,8 @@ export default async function handler(req, res) {
 
   // Get the rewards period
   const vaultBalanceResponse = await alchemy.core.call({
-    to: addresses.NativeToken,
-    data:
-      getBalanceFunctionSig +
-      utils.defaultAbiCoder
-        .encode(["address"], [addresses.NativeTokenVault])
-        .substring(2),
+    to: addresses.NativeTokenVault,
+    data: totalAssetsFunctionSig,
   });
   console.log("vaultBalanceResponse", vaultBalanceResponse);
 
