@@ -25,7 +25,7 @@ export default async function handler(req, res) {
 
   const { chainId } = req.query;
   const createTradingPoolTopic =
-    "0x62bc44df7dccd51a32794da404454232658add2bef839a8e3629ed5c980daabf";
+    "0xa1311e5e3c1c2207844ec9211cb2439ea0bce2a76c6ea09d9343f0d0eaddd9f6";
 
   const alchemySettings = {
     apiKey: process.env.ALCHEMY_API_KEY,
