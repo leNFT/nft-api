@@ -50,12 +50,11 @@ export default async function handler(req, res) {
   try {
     // Go through each event
     tradingPoolsResponse.forEach((element) => {
-      tradingPools[
-        utils.defaultAbiCoder.decode(["address"], element.topics[1])
-      ] = {
-        nft: utils.defaultAbiCoder.decode(["address"], element.topics[2]),
-        token: utils.defaultAbiCoder.decode(["address"], element.topics[3]),
-      };
+      tradingPools[utils.defaultAbiCoder.decode("address", element.topics[1])] =
+        {
+          nft: utils.defaultAbiCoder.decode("address", element.topics[2]),
+          token: utils.defaultAbiCoder.decode("address", element.topics[3]),
+        };
     });
   } catch (error) {
     console.log(error);
