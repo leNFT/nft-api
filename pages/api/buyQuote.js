@@ -33,25 +33,36 @@ export default async function handler(req, res) {
   };
   const alchemy = new Alchemy(alchemySettings);
 
-  const addresses =
-    chainId in contractAddresses
-      ? contractAddresses[chainId]
-      : contractAddresses["1"];
+  const nftToLpFunctionSig = "0x5460d849";
+  const getLpFunctionSig = "0xcdd3f298";
 
-  const getNftIdLPFunctionSig = "0xde8a8949";
   var boughtFromLpCount = {};
   var buyQuote = {};
   for (let i = 0; i < nftsArray.length; i++) {
-    const lpResponse = await alchemy.core.call({
+    const nftToLpResponse = await alchemy.core.call({
       to: pool,
       data:
-        getNftIdLPFunctionSig +
-        ethers.utils.defaultAbiCoder
+        nftToLpFunctionSig +
+        ethers.nftToLpFunctionSig.defaultAbiCoder
           .encode(["uint256"], [nftsArray[i]])
           .slice(2),
     });
+    const lpId = ethers.utils.defaultAbiCoder.decode(
+      ["uint256"],
+      [nftToLpResponse]
+    );
+    console.log("lpId", lpId);
 
-    console.log("lpResponse", lpResponse);
+    const getLpResponse = await alchemy.core.call({
+      to: pool,
+      data:
+        getLpFunctionSig +
+        ethers.nftToLpFunctionSig.defaultAbiCoder
+          .encode(["uint256"], [lpId])
+          .slice(2),
+    });
+
+    console.log("getLpResponse", getLpResponse);
   }
 
   res.status(200).json(buyQuote);
