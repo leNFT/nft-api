@@ -3,6 +3,7 @@ import initMiddleware from "../../lib/init-middleware";
 import { ethers, utils } from "ethers";
 import { Network, Alchemy } from "alchemy-sdk";
 import contractAddresses from "../../contractAddresses.json";
+import { BigNumber } from "@ethersproject/bignumber";
 
 // Initialize the cors middleware
 const cors = initMiddleware(
@@ -43,26 +44,37 @@ export default async function handler(req, res) {
       to: pool,
       data:
         nftToLpFunctionSig +
-        ethers.nftToLpFunctionSig.defaultAbiCoder
+        ethers.utils.defaultAbiCoder
           .encode(["uint256"], [nftsArray[i]])
           .slice(2),
     });
+    console.log("nftToLpResponse", nftToLpResponse);
     const lpId = ethers.utils.defaultAbiCoder.decode(
       ["uint256"],
-      [nftToLpResponse]
+      nftToLpResponse
     );
-    console.log("lpId", lpId);
 
     const getLpResponse = await alchemy.core.call({
       to: pool,
       data:
         getLpFunctionSig +
-        ethers.nftToLpFunctionSig.defaultAbiCoder
-          .encode(["uint256"], [lpId])
-          .slice(2),
+        ethers.utils.defaultAbiCoder.encode(["uint256"], lpId).slice(2),
     });
 
     console.log("getLpResponse", getLpResponse);
+
+    const lp = ethers.utils.defaultAbiCoder.decode(
+      [
+        "address curve",
+        "uint256 delta",
+        "uint256 price",
+        "uint256 tokenAmount",
+        "uint256[] nftIds",
+      ],
+      getLpResponse
+    );
+
+    console.log("lp", lp);
   }
 
   res.status(200).json(buyQuote);
