@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   // Run cors
   await cors(req, res);
 
-  const { chainId, pool, nfts } = req.query;
+  const { chainId, pool, amount } = req.query;
   const nftsArray = nfts.split(",");
   console.log("pool", pool);
   console.log("nftsArray", nftsArray);
