@@ -36,8 +36,9 @@ export default async function handler(req, res) {
 
   const nftToLpFunctionSig = "0x5460d849";
   const getLpFunctionSig = "0xcdd3f298";
+  const priceAfterBuyFunctionSig = "0xbb1690e2";
 
-  var boughtFromLpCount = {};
+  var lpBuyPrice = {};
   var buyQuote = {};
   for (let i = 0; i < nftsArray.length; i++) {
     const nftToLpResponse = await alchemy.core.call({
@@ -65,16 +66,35 @@ export default async function handler(req, res) {
 
     const lp = ethers.utils.defaultAbiCoder.decode(
       [
+        "uint256[] nftIds",
+        "uint256 tokenAmount",
         "address curve",
         "uint256 delta",
         "uint256 price",
-        "uint256 tokenAmount",
-        "uint256[] nftIds",
       ],
       getLpResponse
     );
 
     console.log("lp", lp);
+
+    if (lpBuyPrice[lpId]) {
+      price = lpBuyPrice[lpId];
+    } else {
+      price = lp.price;
+    }
+    const getPriceAfterBuyResponse = await alchemy.core.call({
+      to: lp.curve,
+      data:
+        priceAfterBuyFunctionSig +
+        ethers.utils.defaultAbiCoder.encode(["uint256"], price).slice(2) +
+        ethers.utils.defaultAbiCoder.encode(["uint256"], lp.delta).slice(2),
+    });
+    lpBuyPrice[lpId] = ethers.utils.defaultAbiCoder.decode(
+      ["uint256"],
+      getPriceAfterBuyResponse
+    );
+    console.log("lpBuyPrice[lpId]", lpBuyPrice[lpId]);
+    buyQuote["quote"] += lpBuyPrice[lpId];
   }
 
   res.status(200).json(buyQuote);
