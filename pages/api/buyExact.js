@@ -3,7 +3,7 @@ import initMiddleware from "../../lib/init-middleware";
 import { ethers, utils } from "ethers";
 import { Network, Alchemy } from "alchemy-sdk";
 import contractAddresses from "../../contractAddresses.json";
-import tradingPoolABI from "../../contracts/TradingPool.json";
+import tradingPoolContract from "../../contracts/TradingPool.json";
 import { BigNumber } from "@ethersproject/bignumber";
 
 // Initialize the cors middleware
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     network: chainId == 1 ? Network.ETH_MAINNET : Network.ETH_GOERLI,
   };
   const alchemy = new Alchemy(alchemySettings);
-  const iface = new ethers.utils.Interface(tradingPoolABI);
+  const iface = new ethers.utils.Interface(tradingPoolContract.abi);
   const nftToLpFunctionSig = "0x5460d849";
   const getLpFunctionSig = "0xcdd3f298";
   const priceAfterBuyFunctionSig = "0xbb1690e2";
