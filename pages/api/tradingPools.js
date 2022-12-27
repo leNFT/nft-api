@@ -50,7 +50,9 @@ export default async function handler(req, res) {
 
   try {
     // Go through each event
-    tradingPoolsResponse.forEach(async (element) => {
+    for (let i = 0; i < tradingPoolsResponse.length; i++) {
+      const element = tradingPoolsResponse[i];
+
       const nftAddress = utils.defaultAbiCoder.decode(
         ["address"],
         element.topics[2]
@@ -93,9 +95,12 @@ export default async function handler(req, res) {
           address: tokenAddress,
         },
       };
-    });
+
+      console.log(tradingPools[poolAddress]);
+    }
   } catch (error) {
     console.log(error);
+    res.status(500).json(error);
   }
 
   res.status(200).json(tradingPools);
