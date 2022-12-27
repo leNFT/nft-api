@@ -27,6 +27,7 @@ export default async function handler(req, res) {
   const createTradingPoolTopic =
     "0xa1311e5e3c1c2207844ec9211cb2439ea0bce2a76c6ea09d9343f0d0eaddd9f6";
   const getNameFunctionSig = "0x06fdde03";
+  const getSymbolFunctionSig = "0x95d89b41";
 
   const alchemySettings = {
     apiKey: process.env.ALCHEMY_API_KEY,
@@ -66,9 +67,9 @@ export default async function handler(req, res) {
         element.topics[1]
       )[0];
 
-      const tokenNameResponse = await alchemy.core.call({
+      const tokenSymbolResponse = await alchemy.core.call({
         to: tokenAddress,
-        data: getNameFunctionSig,
+        data: getSymbolFunctionSig,
       });
 
       const nftNameResponse = await alchemy.core.call({
@@ -80,9 +81,9 @@ export default async function handler(req, res) {
         ["string"],
         nftNameResponse
       )[0];
-      const tokenName = utils.defaultAbiCoder.decode(
+      const tokenSymbol = utils.defaultAbiCoder.decode(
         ["string"],
-        tokenNameResponse
+        tokenSymbolResponse
       )[0];
 
       tradingPools[poolAddress] = {
@@ -91,7 +92,7 @@ export default async function handler(req, res) {
           address: nftAddress,
         },
         token: {
-          name: tokenName,
+          name: tokenSymbol,
           address: tokenAddress,
         },
       };
