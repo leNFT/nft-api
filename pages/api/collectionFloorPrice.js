@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   await cors(req, res);
 
   const { address, chainId } = req.query;
-  var returnData = { floorPrice: "0" };
+  var floorPrice = "0";
 
   console.log("Got a price request for chainID:", chainId);
   if (!(address && chainId)) {
@@ -66,9 +66,9 @@ export default async function handler(req, res) {
     //Build return data
     console.log(collection);
     if (collection.data) {
-      returnData.floorPrice = collection.data.floor.wei;
+      floorPrice = collection.data.floor.wei;
     }
   }
 
-  res.status(200).json(returnData);
+  res.status(200).json(floorPrice);
 }
