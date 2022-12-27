@@ -26,6 +26,7 @@ export default async function handler(req, res) {
   const { chainId } = req.query;
   const createTradingPoolTopic =
     "0xa1311e5e3c1c2207844ec9211cb2439ea0bce2a76c6ea09d9343f0d0eaddd9f6";
+  const getNameFunctionSig = "0x06fdde03";
 
   const alchemySettings = {
     apiKey: process.env.ALCHEMY_API_KEY,
@@ -49,12 +50,48 @@ export default async function handler(req, res) {
 
   try {
     // Go through each event
-    tradingPoolsResponse.forEach((element) => {
-      tradingPools[
-        utils.defaultAbiCoder.decode(["address"], element.topics[1])[0]
-      ] = {
-        nft: utils.defaultAbiCoder.decode(["address"], element.topics[2])[0],
-        token: utils.defaultAbiCoder.decode(["address"], element.topics[3])[0],
+    tradingPoolsResponse.forEach(async (element) => {
+      const nftAddress = utils.defaultAbiCoder.decode(
+        ["address"],
+        element.topics[2]
+      )[0];
+      const tokenAddress = utils.defaultAbiCoder.decode(
+        ["address"],
+        element.topics[3]
+      )[0];
+      const poolAddress = utils.defaultAbiCoder.decode(
+        ["address"],
+        element.topics[1]
+      )[0];
+
+      const tokenNameResponse = await alchemy.core.call({
+        to: tokenAddress,
+        data: getNameFunctionSig,
+      });
+
+      const nftNameResponse = await alchemy.core.call({
+        to: nftAddress,
+        data: getNameFunctionSig,
+      });
+
+      const nftName = utils.defaultAbiCoder.decode(
+        ["string"],
+        tokenNameResponse
+      )[0];
+      const tokenName = utils.defaultAbiCoder.decode(
+        ["string"],
+        nftNameResponse
+      )[0];
+
+      tradingPools[poolAddress] = {
+        nft: {
+          name: nftName,
+          address: nftAddress,
+        },
+        token: {
+          name: tokenName,
+          address: tokenAddress,
+        },
       };
     });
   } catch (error) {
