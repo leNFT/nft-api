@@ -78,11 +78,11 @@ export default async function handler(req, res) {
 
       const nftName = utils.defaultAbiCoder.decode(
         ["string"],
-        tokenNameResponse
+        nftNameResponse
       )[0];
       const tokenName = utils.defaultAbiCoder.decode(
         ["string"],
-        nftNameResponse
+        tokenNameResponse
       )[0];
 
       tradingPools[poolAddress] = {
