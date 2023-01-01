@@ -82,7 +82,7 @@ export default async function handler(req, res) {
         to: addresses.GaugeController,
         data:
           getGaugeFunctionSig +
-          utils.defaultAbiCoder.encode(["address"], poolAddress).substring(2),
+          utils.defaultAbiCoder.encode(["address"], [poolAddress]).substring(2),
       });
 
       const nftName = utils.defaultAbiCoder.decode(

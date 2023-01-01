@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       to: pool,
       data:
         getLpFunctionSig +
-        ethers.utils.defaultAbiCoder.encode(["uint256"], lpId).slice(2),
+        ethers.utils.defaultAbiCoder.encode(["uint256"], [lpId]).slice(2),
     });
 
     console.log("getLpResponse", getLpResponse);
