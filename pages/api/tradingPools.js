@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     "0xa1311e5e3c1c2207844ec9211cb2439ea0bce2a76c6ea09d9343f0d0eaddd9f6";
   const getNameFunctionSig = "0x06fdde03";
   const getSymbolFunctionSig = "0x95d89b41";
+  const getGaugeFunctionSig = "0xb1c6f0e9";
 
   const alchemySettings = {
     apiKey: process.env.ALCHEMY_API_KEY,
@@ -77,6 +78,13 @@ export default async function handler(req, res) {
         data: getNameFunctionSig,
       });
 
+      const gaugeResponse = await alchemy.core.call({
+        to: addresses.GaugeController,
+        data:
+          getGaugeFunctionSig +
+          utils.defaultAbiCoder.encode(["address"], poolAddress).substring(2),
+      });
+
       const nftName = utils.defaultAbiCoder.decode(
         ["string"],
         nftNameResponse
@@ -85,8 +93,10 @@ export default async function handler(req, res) {
         ["string"],
         tokenSymbolResponse
       )[0];
+      const gauge = utils.defaultAbiCoder.decode(["address"], gaugeResponse)[0];
 
       tradingPools[poolAddress] = {
+        gauge: gauge,
         nft: {
           name: nftName,
           address: nftAddress,
