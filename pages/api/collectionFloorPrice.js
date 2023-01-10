@@ -38,13 +38,13 @@ export default async function handler(req, res) {
   // Test collections case for goerli
   if (chainId == "5") {
     if (address == addresses.GenesisNFT) {
-      returnData.floorPrice = parseUnits("0.025", 18).toString();
+      floorPrice = parseUnits("0.025", 18).toString();
     } else if (address == "0xf5de760f2e916647fd766B4AD9E85ff943cE3A2b") {
-      returnData.price = parseUnits("0.008", 18).toString();
+      floorPrice = parseUnits("0.008", 18).toString();
     } else if (address == "0x0171dB1e3Cc005d2A6E0BA531509D007a5B8C1a8") {
-      returnData.floorPrice = parseUnits("0.01", 18).toString();
+      floorPrice = parseUnits("0.01", 18).toString();
     } else if (address == "0x932Ca55B9Ef0b3094E8Fa82435b3b4c50d713043") {
-      returnData.floorPrice = parseUnits("0.01", 18).toString();
+      floorPrice = parseUnits("0.01", 18).toString();
     }
     // Mainnet Case
   } else {
